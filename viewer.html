@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zugspitze</title>
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script>
+    var cams = [
+      "http://www.foto-webcam.eu/webcam/wank/current/720.jpg",
+      "http://www.foto-webcam.eu/webcam/meilerhuette/current/720.jpg",
+      "http://www.foto-webcam.eu/webcam/bzb-gipfel/current/720.jpg",
+      "http://www.foto-webcam.eu/webcam/bzb-stuetze/current/720.jpg"
+    ];
+    var interval = 10 * 60;
+
+    /////////////////////////////////////////////////////////////////////
+    //                                                                 //
+    //  Don't edit below this line!                                    //
+    //                                                                 //
+    /////////////////////////////////////////////////////////////////////
+
+    Array.prototype.elimDupes = function() {var i, len=this.length, out=[], obj={}; for (i=0;i<len;i++) {obj[this[i]]=0; } for (i in obj) {out.push(i); } return out; };
+
+    var w = {
+      exp: [],
+      init: function() {
+        var count = cams.length;
+        if(count > 0) {
+          if(count < 2) $('.webcams').addClass('count1');
+          else if(count > 1 && count < 3) $('.webcams').addClass('count2');
+          else if(count > 2 && count < 5) $('.webcams').addClass('count4');
+          else if(count > 4 && count < 7) $('.webcams').addClass('count6');
+          else if(count > 6) $('.webcams').addClass('count9');
+
+          // cams = cams.elimDupes().slice(0,9);
+          cams = cams.slice(0,9);
+          for(var i=0;i<count;i++) {
+            $('.webcams').append('<div><div></div></div>');
+          }
+          w.refresh();
+        }
+      },
+      refresh: function() {
+        var l = [], splitIvl = Math.floor(interval / cams.length);
+
+        for(var i=0;i<cams.length;i++) {
+          if(typeof w.exp[i] == "undefined" || (new Date().getTime() - w.exp[i]) >= 0) {
+            w.exp[i] = typeof w.exp[i] == "undefined" ? new Date().getTime() + ((i + 1) * splitIvl * 1000) : new Date().getTime() + (interval * 1000);
+            l[i] = new Image();l[i].src = cams[i] + (cams[i].indexOf('?') > -1 ?'&':'?') + new Date().getTime();
+            $(l[i]).data('index',i);
+            l[i].onload = function() {
+              var index = parseInt($(this).data('index')) + 1;
+              $('.webcams > div:nth-child(' + index + ')').prepend('<div style="background-image:url(\'' + this.src + '\')"></div>');
+              $('.webcams > div:nth-child(' + index + ') div:last-child').fadeOut(1000,function() {$(this).remove(); setTimeout(w.refresh,splitIvl * 1000);});
+            };
+          }
+        }
+      }
+    };
+    $(document).ready(function() {w.init();});
+  </script>
+  <style>
+    body{margin:0;padding:0;background:#000;}
+    .webcams{position:absolute;top:0;left:0;bottom:0;right:0;}
+    .webcams > div{float:left;position:relative;}
+    .webcams > div div{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;background-size:cover;background-repeat:no-repeat;background-position:center;}
+    .webcams.count1 > div{width:100%;height:100%;}
+    .webcams.count2 > div{width:50%;height:100%;}
+    .webcams.count4 > div{width:50%;height:50%;}
+    .webcams.count6 > div{width:33.3%;height:50%;}
+    .webcams.count9 > div{width:33.3%;height:33.3%;}
+  </style>
+</head>
+<body>
+  <div class="webcams"></div>
+</body>
+</html>
